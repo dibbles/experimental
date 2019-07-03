@@ -39,10 +39,6 @@ func (r Resource) createWebhook(request *restful.Request, response *restful.Resp
 	defer modifyingConfigMapLock.Unlock()
 
 	logging.Log.Infof("Creating webhook with request: %+v.", request)
-	installNs := r.Defaults.Namespace
-	if installNs == "" {
-		installNs = "default"
-	}
 
 	webhook := webhook{}
 	if err := request.ReadEntity(&webhook); err != nil {
@@ -125,21 +121,21 @@ func (r Resource) createWebhook(request *restful.Request, response *restful.Resp
 		RespondError(response, err, http.StatusBadRequest)
 		return
 	}
-	_, err := r.EventSrcClient.SourcesV1alpha1().GitHubSources(installNs).Create(&entry)
+	_, err := r.EventSrcClient.SourcesV1alpha1().GitHubSources(namespace).Create(&entry)
 	if err != nil {
 		logging.Log.Errorf("Error creating GitHub source: %s.", err.Error())
 		RespondError(response, err, http.StatusBadRequest)
 		return
 	}
-	webhooks, err := r.readGitHubWebhooks(installNs)
+	webhooks, err := r.readGitHubWebhooks(namespace)
 	if err != nil {
 		logging.Log.Errorf("error getting GitHub webhooks: %s.", err.Error())
 		RespondError(response, err, http.StatusInternalServerError)
 		return
 	}
 	webhooks[webhook.Name] = webhook
-	logging.Log.Debugf("Writing the GitHubSource webhook ConfigMap in namespace %s", installNs)
-	r.writeGitHubWebhooks(installNs, webhooks)
+	logging.Log.Debugf("Writing the GitHubSource webhook ConfigMap in namespace %s", namespace)
+	r.writeGitHubWebhooks(namespace, webhooks)
 	response.WriteHeader(http.StatusCreated)
 }
 
@@ -283,21 +279,30 @@ func (r Resource) deleteWebhookFromConfigMapByName(webhookName, namespace string
 }
 
 func (r Resource) getAllWebhooks(request *restful.Request, response *restful.Response) {
-	installNs := r.Defaults.Namespace
-	if installNs == "" {
-		installNs = "default"
-	}
 
-	logging.Log.Debugf("Get all webhooks in namespace: %s.", installNs)
-	sources, err := r.readGitHubWebhooks(installNs)
+	logging.Log.Debugf("Get all webhooks")
+	namespaces, err := r.K8sClient.CoreV1().Namespaces().List(metav1.ListOptions{})
 	if err != nil {
-		logging.Log.Errorf("error trying to get webhooks: %s.", err.Error())
+		logging.Log.Errorf("error retrieving namespaces: %s.", err.Error())
 		RespondError(response, err, http.StatusInternalServerError)
 		return
 	}
+	logging.Log.Debugf("DUANE %d", namespaces.Size())
+	logging.Log.Debugf("DUANE2 %d", len(namespaces.Items))
+	logging.Log.Debugf("DUANE: %v", namespaces.String())
 	sourcesList := []webhook{}
-	for _, value := range sources {
-		sourcesList = append(sourcesList, value)
+	for _, ns := range namespaces.Items {
+		logging.Log.Debugf("DUANE %s", ns.Name)
+
+		sources, err := r.readGitHubWebhooks(ns.Name)
+		if err != nil {
+			logging.Log.Errorf("error trying to get webhooks: %s.", err.Error())
+			RespondError(response, err, http.StatusInternalServerError)
+			return
+		}
+		for _, value := range sources {
+			sourcesList = append(sourcesList, value)
+		}
 	}
 	response.WriteEntity(sourcesList)
 }

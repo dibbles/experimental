@@ -234,7 +234,7 @@ export class WebhookDisplayTable extends Component {
                         </TableToolbarContent>
                     </div>
                     <TableToolbar>
-                      <TableBatchActions {...getBatchActionProps()}>
+                      <TableBatchActions {...getBatchActionProps() }>
                         <TableBatchAction id="delete-btn" renderIcon={Delete} onClick={() => {this.showDeleteDialogHandlerVisible(selectedRows)}}>Delete</TableBatchAction>
                       </TableBatchActions>
                     </TableToolbar>
