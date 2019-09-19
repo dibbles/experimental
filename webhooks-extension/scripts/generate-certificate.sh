@@ -19,5 +19,5 @@ openssl req -x509 -new -nodes -key cert-files/key.pem -sha256 -days 1825 -out ce
 openssl rsa -in cert-files/key.pem -out cert-files/key.pem -passin pass:${CertificateKeyPassphrase}
 
 # Now create the secret that will be mounted in for use by the Ingress task
-kubectl create secret tls ${SecretName} --cert=cert-files/certificate.pem --key=cert-files/key.pem
+kubectl create secret tls ${SecretName} --cert=cert-files/certificate.pem --key=cert-files/key.pem -n tekton-pipelines
 

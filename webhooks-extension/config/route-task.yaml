@@ -20,7 +20,7 @@ spec:
       type: string
     - name: EventListenerPort
       description: The EventListener port
-      default: "8082"
+      default: "8080"
       type: string
   steps:
   - name: create-or-delete-route

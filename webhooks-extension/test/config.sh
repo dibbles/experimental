@@ -2,14 +2,11 @@
 
 ##### Version specs
 # These defaults are known compatible versions
-export KNATIVE_VERSION="v0.6.0"
 export TEKTON_VERSION="0.7.0"
-# Use "latest" or specify exact version/release: https://github.com/istio/istio/releases
-export ISTIO_VERSION="1.1.7"
-# Side car injection gets stuck in "Container Creating" state when disabled
-export ISTIO_SIDECAR_INJECTION="true"
-# To prevent Git Hub rate limiting when pulling latest Istio
-export GITHUB_TOKEN=''
+export TEKTON_TRIGGERS_VERSION="0.1.0"
+
+# To prevent Git Hub rate limiting when pulling images\
+export GITHUB_TOKEN=
 
 ##### Dashboard specs
 export DASHBOARD_INSTALL_NS="tekton-pipelines"

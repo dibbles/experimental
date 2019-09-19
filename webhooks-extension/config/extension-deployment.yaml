@@ -104,4 +104,11 @@ spec:
           # creating the EventListener, Ingress and webhooks.
           # The Ingress will be created with the tls secret name value set to this variable's value.
           - name: TRIGGERS_PROTOTYPE_INGRESS_CERTIFICATE_SECRET_NAME
-            value: ""
+            value: "ingress-secret"
+          # If this endpoint's protocol is https, ssl verification will be enabled on the github webhook
+          - name: WEBHOOK_CALLBACK_URL
+            value: "http://listener.9.140.104.191.nip.io"
+          - name: SERVICE_ACCOUNT
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.serviceAccountName

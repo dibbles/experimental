@@ -1,3 +1,8 @@
+
+
+
+![Architecture Diagram](./images/germanComment.png?raw=true "Diagram showing overall runtime architecture of the webhooks extension")
+
 # tekton-validate-github-event
 
 For https://github.com/tektoncd/experimental/issues/245
