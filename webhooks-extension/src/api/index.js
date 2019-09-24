@@ -89,3 +89,16 @@ export function deleteWebhooks(id, namespace, repo, deleteRuns) {
   const uri = `${apiRoot}/webhooks/${id}?namespace=${namespace}&repository=${repo}${deleteRunsQuery}`;
   return deleteRequest(uri);
 }
+
+export function getPipelineRuns({ filters = [] } = {}) {
+  let uri;
+  if (filters.length > 0) {
+    let queryParams = { labelSelector: [filters] };
+    uri = `${dashboardAPIRoot}/proxy/apis/tekton.dev/v1alpha1/pipelineruns/?${new URLSearchParams(
+      queryParams
+    ).toString()}`;
+  } else {
+    uri = `${dashboardAPIRoot}/proxy/apis/tekton.dev/v1alpha1/pipelineruns/`;
+  }
+  return get(uri);
+}
