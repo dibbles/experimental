@@ -91,6 +91,15 @@ export class WebhookBranches extends Component {
       });
   }
 
+  formatCellContent(id, value) {
+    // Render the git repo as a clickable link
+    if (id.endsWith(":repository")) {
+      return <a href={value} target="_blank" rel="noopener noreferrer">{value}</a>
+    } else {
+      return value
+    }
+  }
+
   render() {
     const { close } = this.props;
     const { rows, loading, error } = this.state;
@@ -165,7 +174,7 @@ export class WebhookBranches extends Component {
                               index === row.cells.length - 1 ? cell.value : null
                             }
                           >
-                            {cell.value}
+                            {this.formatCellContent(cell.id, cell.value)}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -187,3 +196,15 @@ export class WebhookBranches extends Component {
     );
   }
 }
+
+
+<TableBody>
+                            {rows.map(row => (
+                              <TableRow {...getRowProps({ row })} key={row.id}>
+                                <TableSelectRow {...getSelectionProps({ row })} />
+                                {row.cells.map((cell, index) => (
+                                  <TableCell onClick={index === 0 ? () => {this.viewBranches(row.cells[1].value)} : null} key={cell.id}>{this.formatCellContent(cell.id, cell.value)}</TableCell>
+                                ))}
+                              </TableRow>
+                            ))}
+                          </TableBody>
