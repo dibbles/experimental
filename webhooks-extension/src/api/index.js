@@ -90,15 +90,10 @@ export function deleteWebhooks(id, namespace, repo, deleteRuns) {
   return deleteRequest(uri);
 }
 
-export function getPipelineRuns({ filters = [] } = {}) {
-  let uri;
-  if (filters.length > 0) {
-    let queryParams = { labelSelector: [filters] };
-    uri = `${dashboardAPIRoot}/proxy/apis/tekton.dev/v1alpha1/pipelineruns/?${new URLSearchParams(
-      queryParams
-    ).toString()}`;
-  } else {
-    uri = `${dashboardAPIRoot}/proxy/apis/tekton.dev/v1alpha1/pipelineruns/`;
-  }
+export function getPipelineRuns({ namespace, pipeline, filters }) {
+  let queryParams = { labelSelector: [`tekton.dev/pipeline=${pipeline}`, ...filters] };
+  const uri = `${dashboardAPIRoot}/proxy/apis/tekton.dev/v1alpha1/namespaces/${namespace}/pipelineruns/?${new URLSearchParams(
+    queryParams
+  ).toString()}`;
   return get(uri);
 }

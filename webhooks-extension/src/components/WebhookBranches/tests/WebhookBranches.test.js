@@ -20,7 +20,11 @@ import 'react-testing-library/cleanup-after-each';
 
 beforeEach(jest.restoreAllMocks);
 
-const webhook = 'https://githuub.com/someUser/someRepo';
+const webhook = {
+  url: "https://githuub.com/someUser/someRepo",
+  namespace: "default",
+  pipeline: "pipeline1"
+};
 
 const pipelineRuns = {
   items: [

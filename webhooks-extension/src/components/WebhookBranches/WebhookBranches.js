@@ -44,36 +44,55 @@ export class WebhookBranches extends Component {
   }
 
   componentDidMount() {
-    let [server, org, repo] = this.props.webhook
+    let { name, url, namespace, pipeline } = this.props.webhook;
+    let [server, org, repo] = url
       .toLowerCase()
       .replace(/https?:\/\//, "")
       .split("/");
 
     getPipelineRuns({
+      namespace,
+      pipeline,
       filters: [`gitOrg=${org}`, `gitServer=${server}`, `gitRepo=${repo}`]
     })
       .then(pipelineRuns => {
         let branches = [];
-        const rows = pipelineRuns.items.reduce((result, pipelineRun) => {
-          if (branches.indexOf(pipelineRun.metadata.labels.gitBranch) === -1) {
-            branches.push(pipelineRun.metadata.labels.gitBranch);
-            const time = new Date(
-              pipelineRun.status.conditions[
-                pipelineRun.status.conditions.length - 1
-              ].lastTransitionTime
-            );
-            result.push({
-              id: `${pipelineRun.metadata.labels.gitBranch}-branch`,
-              branch: pipelineRun.metadata.labels.gitBranch,
-              time: `${time.toLocaleDateString()} - ${time.toLocaleTimeString()}`,
-              status:
+        const rows = pipelineRuns.items
+          .sort(
+            (a, b) =>
+              new Date(
+                b.status.conditions[
+                  b.status.conditions.length - 1
+                ].lastTransitionTime
+              ) -
+              new Date(
+                a.status.conditions[
+                  a.status.conditions.length - 1
+                ].lastTransitionTime
+              )
+          )
+          .reduce((result, pipelineRun) => {
+            if (
+              branches.indexOf(pipelineRun.metadata.labels.gitBranch) === -1
+            ) {
+              branches.push(pipelineRun.metadata.labels.gitBranch);
+              const time = new Date(
                 pipelineRun.status.conditions[
                   pipelineRun.status.conditions.length - 1
-                ].reason
-            });
-          }
-          return result;
-        }, []);
+                ].lastTransitionTime
+              );
+              result.push({
+                id: `${pipelineRun.metadata.labels.gitBranch}-branch`,
+                branch: pipelineRun.metadata.labels.gitBranch,
+                time: `${time.toLocaleDateString()} - ${time.toLocaleTimeString()}`,
+                status:
+                  pipelineRun.status.conditions[
+                    pipelineRun.status.conditions.length - 1
+                  ].reason
+              });
+            }
+            return result;
+          }, []);
 
         this.setState({
           rows,
@@ -126,7 +145,7 @@ export class WebhookBranches extends Component {
       <Modal
         open
         id="webhook-branches-modal"
-        modalHeading="Only branches with executed PipelineRuns will appear below:"
+        modalHeading="Latest PipelineRuns By Branch:"
         passiveModal
         onRequestClose={close}
       >
@@ -138,10 +157,23 @@ export class WebhookBranches extends Component {
             lowContrast
           />
         )}
+        <div>
+          <p>
+            <strong>Webhook Name:</strong> {this.props.webhook.name}
+          </p>
+          <p>
+            <strong>Repository:</strong> <a target="_blank" href={this.props.webhook.url}>{this.props.webhook.url}</a>
+          </p>
+          <p>
+            <strong>Pipeline:</strong> {this.props.webhook.pipeline}
+          </p>
+          <p>
+            <strong>Namespace:</strong> {this.props.webhook.namespace}
+          </p>
+        </div>
         <DataTable
           rows={rows}
           headers={headers}
-          useZebraStyles
           render={({ rows, headers, getHeaderProps, getRowProps }) => (
             <TableContainer>
               {loading ? (
@@ -191,7 +223,7 @@ export class WebhookBranches extends Component {
         {rows.length === 0 && !loading && (
           <div className="noBranches">
             <p>
-              {'Currently there are no branches associated with a pipelineRun.'}
+              Unable to identify any PipelineRuns initiated by this webhook.
             </p>
           </div>
         )}

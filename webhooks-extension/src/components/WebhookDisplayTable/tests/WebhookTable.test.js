@@ -94,7 +94,7 @@ describe('with webhooks', () => {
     await waitForElement(() => getByText(/first-test-webhook/i));
 
     fireEvent.click(getByText(/first-test-webhook/i));
-    expect(getByText("Only branches with executed PipelineRuns will appear below:")).not.toBeNull();
+    expect(getByText("Latest PipelineRuns By Branch:")).not.toBeNull();
 
   });
 });

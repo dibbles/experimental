@@ -325,7 +325,28 @@ export class WebhookDisplayTable extends Component {
                               <TableRow {...getRowProps({ row })} key={row.id}>
                                 <TableSelectRow {...getSelectionProps({ row })} />
                                 {row.cells.map((cell, index) => (
-                                  <TableCell onClick={index === 0 ? () => {this.viewBranches(row.cells[1].value)} : null} key={cell.id}>{this.formatCellContent(cell.id, cell.value)}</TableCell>
+                                  <TableCell
+                                    onClick={
+                                      index === 0
+                                        ? () => {
+                                            this.viewBranches({
+                                              name: row.cells[0].value,
+                                              url: row.cells[1].value,
+                                              namespace: row.cells[3].value,
+                                              pipeline: row.cells[2].value
+                                            });
+                                          }
+                                        : null
+                                    }
+                                    className={
+                                      index === 0
+                                        ? "clickableNameURL"
+                                        : null
+                                    }
+                                    key={cell.id}
+                                  >
+                                    {this.formatCellContent(cell.id, cell.value)}
+                                  </TableCell>
                                 ))}
                               </TableRow>
                             ))}
