@@ -13,7 +13,7 @@ limitations under the License.
 
 import React, { Component } from 'react';
 import { Modal } from 'carbon-components-react';
-import { getPipelineRuns } from '../../api';
+import { getPipelineRuns, getDashboardAPIRoot } from '../../api';
 
 import './WebhookBranches.scss';
 
@@ -92,9 +92,12 @@ export class WebhookBranches extends Component {
   }
 
   formatCellContent(id, value) {
-    // Render the git repo as a clickable link
-    if (id.endsWith(":repository")) {
-      return <a href={value} target="_blank" rel="noopener noreferrer">{value}</a>
+    // Render the branch as a clickable link
+    console.log(id)
+    if (id.endsWith(":branch")) {
+      const dashboardAPIRoot = getDashboardAPIRoot();
+      let uri = `${dashboardAPIRoot}/#/pipelineruns?labelSelector=gitBranch%3D${value}`
+      return <a href={uri} target="_blank" rel="noopener noreferrer">{value}</a>
     } else {
       return value
     }
@@ -196,15 +199,3 @@ export class WebhookBranches extends Component {
     );
   }
 }
-
-
-<TableBody>
-                            {rows.map(row => (
-                              <TableRow {...getRowProps({ row })} key={row.id}>
-                                <TableSelectRow {...getSelectionProps({ row })} />
-                                {row.cells.map((cell, index) => (
-                                  <TableCell onClick={index === 0 ? () => {this.viewBranches(row.cells[1].value)} : null} key={cell.id}>{this.formatCellContent(cell.id, cell.value)}</TableCell>
-                                ))}
-                              </TableRow>
-                            ))}
-                          </TableBody>
