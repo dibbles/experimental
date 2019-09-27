@@ -110,13 +110,16 @@ export class WebhookBranches extends Component {
       });
   }
 
-  formatCellContent(id, value) {
+  formatCellContent(id, value, ns, pipe, repourl) {
     // Render the branch as a clickable link
-    console.log(id)
+    let url = new URL(repourl);
+    let server = url.hostname;
+    let org = url.pathname.split('/')[1].toLowerCase()
+    let repo = url.pathname.split('/')[2].toLowerCase()
     if (id.endsWith(":branch")) {
       const dashboardAPIRoot = getDashboardAPIRoot();
-      let uri = `${dashboardAPIRoot}/#/pipelineruns?labelSelector=gitBranch%3D${value}`
-      return <a href={uri} target="_blank" rel="noopener noreferrer">{value}</a>
+      let uri = `${dashboardAPIRoot}/#/namespaces/${ns}/pipelineruns?labelSelector=tekton.dev%2Fpipeline%3D${pipe}%2CgitServer%3D${server}%2CgitOrg%3D${org}%2CgitRepo%3D${repo}%2CgitBranch%3D${value}`
+      return <a href={uri} rel="noopener noreferrer">{value}</a>
     } else {
       return value
     }
@@ -209,7 +212,7 @@ export class WebhookBranches extends Component {
                               index === row.cells.length - 1 ? cell.value : null
                             }
                           >
-                            {this.formatCellContent(cell.id, cell.value)}
+                            {this.formatCellContent(cell.id, cell.value, this.props.webhook.namespace, this.props.webhook.pipeline, this.props.webhook.url)}
                           </TableCell>
                         ))}
                       </TableRow>
