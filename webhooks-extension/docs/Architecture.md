@@ -38,7 +38,7 @@ The diagram above shows the events that take place when webhooks are created via
 
 1) Creating or updating the eventlistener with the new trigger (webhook).  For each webhook there are currently two triggers added to the event listener.  This is because push and pull request webhook payloads from GitHub contain information in different places and it is highly likely you will need different bindings to retrieve the relevant information from the event payload. 
 
-A third trigger is added when the first webhook is created for each GitHub repository. This trigger is for the monitor taskrun that is created when a pull request event occurs on the repository.  You will only have one monitor trigger per git repository.
+  A third trigger is added when the first webhook is created for each GitHub repository. This trigger is for the monitor taskrun that is created when a pull request event occurs on the repository.  You will only have one monitor trigger per git repository.
 
 2) Creation of a taskrun to create the ingress/route which exposes the eventlistener to the world outside of the cluster.
 
@@ -49,6 +49,7 @@ Currently there is also a fourth stage where a githubwebhooks config map is crea
 <br/>
 
 ## Webhook Runtime Architecture
+<br/>
 
 ![Architecture Diagram](./images/architecture.png?raw=true "Diagram showing overall runtime architecture of the webhooks extension")
 
