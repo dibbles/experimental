@@ -8,11 +8,15 @@
 
 ![User Setup Diagram](./images/setup.png?raw=true "Diagram showing initial user setup")
 
+![User Setup Diagram2](./images/setup-1.png?raw=true "Diagram showing initial user setup")
+
+The diagram above shows what initial configuration a user should be in prior to using the webhooks extension.  The process consists of:
+
 ## Webhook Runtime Architecture
 
 ![Architecture Diagram](./images/architecture.png?raw=true "Diagram showing overall runtime architecture of the webhooks extension")
 
-The diagram above shows what occurs at runtime when webhooks are triggered.
+The diagram above shows what occurs at runtime when webhooks are triggered.  The process consists of:
 
 1) All webhooks communicate with a single ingress/route as an access point to the cluster.
 
