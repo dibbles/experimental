@@ -1,5 +1,7 @@
 # Architecture Information
 
+## Contents
+
 1. [End User Overview](#end-user-overview)
 2. [Webhook Runtime Architecture](#webhook-runtime-architecture)
 2. [Webhook Creation Architecture](#webhook-creation-architecture)
@@ -8,9 +10,20 @@
 
 ![User Setup Diagram](./images/setup.png?raw=true "Diagram showing initial user setup")
 
-![User Setup Diagram2](./images/setup-1.png?raw=true "Diagram showing initial user setup")
-
 The diagram above shows what initial configuration a user should be in prior to using the webhooks extension.  The process consists of:
+
+1) Installing the necessary parts of Tekton
+
+2) Creating a secret (if using ingress), that holds the SSL certificate securing the endpoint.  Created in the same namespace as the Tekton installation.
+
+3) Installing the triggertemplate for your pipeline into the same namespace as the Tekton installation. _Your triggertemplate must currently be named <pipeline-name>-template_.
+
+4) Installing the triggerbindings for your pipeline into the same namespace as the Tekton installation. _You need to install two triggerbindings per pipeline, one for pull request events and one for push events.  It is believed that this is likely to be changed in a future release. Your triggerbindings must currently be named <pipeline-name>-push-binding and <pipeline-name>-pullrequest-binding_.
+
+5) Creating secrets for accessing GitHub and Docker and patching them onto the service account under which you want your pipelinerun to execute.  These secrets need creating in the _target namespace_ where you want your pipeline to run.  Note that some of this process can be completed using the Tekton Dashboard.
+
+6) Installing the pipeline into the _target namespace_ where you want the pipeline to run.
+
 
 ## Webhook Runtime Architecture
 
