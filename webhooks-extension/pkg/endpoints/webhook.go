@@ -510,21 +510,24 @@ func (r Resource) createWebhook(request *restful.Request, response *restful.Resp
 
 	}
 
-	webhookTaskRun, err := r.createGitHubWebhookTaskRun("create", installNs, sanitisedURL, gitServer, webhook)
-	if err != nil {
-		msg := fmt.Sprintf("error creating taskrun to create github webhook. Error was: %s", err)
-		logging.Log.Errorf("%s", msg)
-		RespondError(response, errors.New(msg), http.StatusInternalServerError)
-		return
-	}
-	webhookTaskRunResult, err := r.checkTaskRunSucceeds(webhookTaskRun, installNs)
-	if !webhookTaskRunResult && err != nil {
-		msg := fmt.Sprintf("error in taskrun creating webhook. Error was: %s", err)
-		logging.Log.Errorf("%s", msg)
-		RespondError(response, errors.New(msg), http.StatusInternalServerError)
-		return
-	} else {
+	if len(hooks) == 0 {
+		webhookTaskRun, err := r.createGitHubWebhookTaskRun("create", installNs, sanitisedURL, gitServer, webhook)
+		if err != nil {
+			msg := fmt.Sprintf("error creating taskrun to create github webhook. Error was: %s", err)
+			logging.Log.Errorf("%s", msg)
+			RespondError(response, errors.New(msg), http.StatusInternalServerError)
+			return
+		}
+		webhookTaskRunResult, err := r.checkTaskRunSucceeds(webhookTaskRun, installNs)
+		if !webhookTaskRunResult && err != nil {
+			msg := fmt.Sprintf("error in taskrun creating webhook. Error was: %s", err)
+			logging.Log.Errorf("%s", msg)
+			RespondError(response, errors.New(msg), http.StatusInternalServerError)
+			return
+		}
 		logging.Log.Debug("webhook taskrun succeeded")
+	} else {
+		logging.Log.Debugf("webhook already exists for repository %s - not creating new hook in GitHub", sanitisedURL)
 	}
 
 	webhooks, err := r.readGitHubWebhooksFromConfigMap()

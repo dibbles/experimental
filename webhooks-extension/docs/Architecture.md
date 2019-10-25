@@ -20,18 +20,29 @@ The diagram above shows the initial configuration required prior to using the we
 
 - Installing the triggertemplate for your pipeline into the same namespace as the Tekton installation. **Your triggertemplate must currently be named `<pipeline-name>-template`**.
 
-- Installing the triggerbindings for your pipeline into the same namespace as the Tekton installation. **You need to install two triggerbindings per pipeline**, one for pull request events and one for push events.  It is believed that this is likely to be changed in a future release. **Your triggerbindings must currently be named `<pipeline-name>-push-binding` and `<pipeline-name>-pullrequest-binding`***.
+- Installing the triggerbindings for your pipeline into the same namespace as the Tekton installation. **You need to install two triggerbindings per pipeline**, one for pull request events and one for push events.  It is believed that this is likely to be changed in a future release. **Your triggerbindings must currently be named `<pipeline-name>-push-binding` and `<pipeline-name>-pullrequest-binding`**.
 
 - Creating secrets for accessing GitHub and Docker and patching them onto the service account under which you want your pipelinerun to execute.  These secrets need creating in the **target namespace** where you want your pipeline to run.  Note that some of this process can be completed using the Tekton Dashboard.
 
 - Installing the pipeline into the **target namespace** where you want the pipeline to run.
 
+Note: On installation of the webhooks extension a number of tasks and deployments are installed that are used by the webhooks extension - these are omitted from diagram above as they are installed automatically as a consequence of installing the webhooks extension.
 <br/>
 <br/>
 
 ## Webhook Creation Architecture
 
 ![Webhook Creation Architecture Diagram](./images/creation-architecture.png?raw=true "Diagram showing webhook creation architecture of the webhooks extension")
+
+The diagram above shows the events that take place when webhooks are created via the UI. The process consists of:
+
+1) Creating or updating the eventlistener with the new trigger (webhook).  For each webhook there are currently two triggers added to the event listener.  This is because push and pull request webhook payloads from GitHub contain information in different places and it is highly likely you will need different bindings to retrieve the relevant information from the event payload. 
+
+A third trigger is added when the first webhook is created for each GitHub repository. This trigger is for the monitor taskrun that is created when a pull request event occurs on the repository.  You will only have one monitor trigger per git repository.
+
+2) Creation of a taskrun to create the ingress/route which exposes the eventlistener to the world outside of the cluster.
+
+3) Creation of a taskrun to create the webhook in GitHub (if one does not already exist).
 
 Currently there is also a fourth stage where a githubwebhooks config map is created (or updated) to hold the configuration of the webhooks across the different git repositories.  This configmap is used to display the webhooks in the UI but is likely to be removed as the data is also within the eventlistener.
 <br/>
