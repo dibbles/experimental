@@ -44,7 +44,7 @@ The diagram above shows the events that take place when webhooks are created via
 
 3) Creation of a taskrun to create the webhook in GitHub (if one does not already exist).
 
-Currently there is also a fourth stage where a githubwebhooks config map is created (or updated) to hold the configuration of the webhooks across the different git repositories.  This configmap is used to display the webhooks in the UI but is likely to be removed as the data is also within the eventlistener.
+Currently there is also a fourth stage where a `githubwebhook` config map is created (or updated) to hold the configuration of the webhooks across the different git repositories.  This configmap is used to display the webhooks in the UI but is likely to be removed as the data is also within the eventlistener.
 <br/>
 <br/>
 
