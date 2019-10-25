@@ -31,6 +31,9 @@ The diagram above shows the initial configuration required prior to using the we
 
 ## Webhook Creation Architecture
 
+![Webhook Creation Architecture Diagram](./images/creation-architecture.png?raw=true "Diagram showing webhook creation architecture of the webhooks extension")
+
+Currently there is also a fourth stage where a githubwebhooks config map is created (or updated) to hold the configuration of the webhooks across the different git repositories.  This configmap is used to display the webhooks in the UI but is likely to be removed as the data is also within the eventlistener.
 <br/>
 <br/>
 
