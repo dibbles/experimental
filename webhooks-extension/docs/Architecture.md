@@ -6,8 +6,7 @@
 2. [Webhook Creation Architecture](#webhook-creation-architecture)
 3. [Webhook Runtime Architecture](#webhook-runtime-architecture)
 
-<br/>
-<br/>
+
 
 ## Initial Setup Overview
 
@@ -49,9 +48,11 @@ The diagram above shows what occurs at runtime when webhooks are triggered.  The
 
 4) The interceptor service's response to each request determines whether or not the trigger is valid for the incoming webhook event.  The interceptor checks:
 
- - Valid X-Hub signature - secret token defined at webhook creation matches the secret token on the incoming webhook.
- - Repository URL matches - so we only activate a trigger for a selected repository.
- - Webhook event matches - so we only activate a trigger for a selected event type, a push or pull request event.
+    - Valid X-Hub signature - secret token defined at webhook creation matches the secret token on the incoming webhook.
+    
+    - Repository URL matches - so we only activate a trigger for a selected repository.
+    
+    - Webhook event matches - so we only activate a trigger for a selected event type, a push or pull request event.
 
 5) The Tekton Triggers code creates the necessary pipelineresources, pipelineruns etc... as defined in the triggertemplate - substituting parameters as defined in the triggerbinding or from the parameters set on the trigger in the eventlistener.
 
