@@ -17,13 +17,13 @@ The diagram above shows the initial configuration required prior to using the we
 
 2) Creating a secret (if using ingress), that holds the SSL certificate securing the endpoint.  Created in the same namespace as the Tekton installation.
 
-3) Installing the triggertemplate for your pipeline into the same namespace as the Tekton installation. *Your triggertemplate must currently be named <pipeline-name>-template*.
+3) Installing the triggertemplate for your pipeline into the same namespace as the Tekton installation. **Your triggertemplate must currently be named `<pipeline-name>-template`**.
 
-4) Installing the triggerbindings for your pipeline into the same namespace as the Tekton installation. *You need to install two triggerbindings per pipeline*, one for pull request events and one for push events.  It is believed that this is likely to be changed in a future release. *Your triggerbindings must currently be named <pipeline-name>-push-binding and <pipeline-name>-pullrequest-binding*.
+4) Installing the triggerbindings for your pipeline into the same namespace as the Tekton installation. **You need to install two triggerbindings per pipeline**, one for pull request events and one for push events.  It is believed that this is likely to be changed in a future release. **Your triggerbindings must currently be named `<pipeline-name>-push-binding` and `<pipeline-name>-pullrequest-binding`***.
 
-5) Creating secrets for accessing GitHub and Docker and patching them onto the service account under which you want your pipelinerun to execute.  These secrets need creating in the *target namespace* where you want your pipeline to run.  Note that some of this process can be completed using the Tekton Dashboard.
+5) Creating secrets for accessing GitHub and Docker and patching them onto the service account under which you want your pipelinerun to execute.  These secrets need creating in the **target namespace** where you want your pipeline to run.  Note that some of this process can be completed using the Tekton Dashboard.
 
-6) Installing the pipeline into the *target namespace* where you want the pipeline to run.
+6) Installing the pipeline into the **target namespace** where you want the pipeline to run.
 
  
 ## Webhook Runtime Architecture
