@@ -22,9 +22,11 @@ An error is displayed mentioning that problems occurred deleting webhooks (the o
 
 ## Tekton Triggers Information
 
+#### Trigger Template & Trigger Bindings
 
 
-#### PipelineRuns Parameters/Resources
+
+#### Event Listener Parameters
 
 For a PipelineRun for your chosen Pipeline, in the namespace specified when your webhook was created, the values assigned to parameters on the PipelineRun are taken from values provided when configuring the webhook or from the webhook payload itself.
 
