@@ -20,5 +20,5 @@ To uninstall to webhooks extension:
 Uninstall any of the prereqs added during installation:
 
 1. [Uninstall Tekton Dashboard](https://github.com/tektoncd/dashboard)  
-2. [Unintsall Knative](https://knative.dev/docs/)  
-3. [Uninstall Istio](https://istio.io/docs/setup/kubernetes/getting-started/)  
+2. [Uninstall Tekton Triggers](URL HERE)
+3. [Uninstall Tekton Pipelines](URL HERE)

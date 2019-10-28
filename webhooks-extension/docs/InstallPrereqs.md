@@ -2,7 +2,6 @@
 
 1. [Cluster requirements](#cluster-requirements)
 2. [Install prereqs](#install-prereqs)
-3. [Knative setup](#domain-setup-for-knative-serving)
 
 ## Cluster requirements
 

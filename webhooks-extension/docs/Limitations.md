@@ -4,11 +4,9 @@
 - Only GitHub webhooks are currently supported.
 - Webhooks in GitHub are sometimes left behind after deletion (details further below).
 - Only `push` and `pull_request` events are currently supported, these are the events defined on the webhook.
-- A limited number of pipelines will currently work with this implementation.
-
-## Webhook not deleted
-
-Due to a bug in the Knative codebase, the deletion of the webhook does not alway occur in GitHub.  All artifacts required for the webhook to run a pipeline are successfully removed from the cluster but, the webhook in GitHub may need to be manually deleted.  Until the webhook is manually deleted, it will attempt to send event details to a non-existent service.  This problem will cease to exist once [issue 247](https://github.com/tektoncd/experimental/issues/247) is addressed and the webhooks extension moves away from its dependency on Knative.
+- The trigger template needs to be available in the install namespace with the name `<pipeline-name>-template` (details further below).
+- The two trigger bindings need to available in the install namespace with the names `<pipeline-name>-push-binding` and `<pipeline-name>-pullrequest-binding` (details further below).
+- Limited configurable parameters are added to the trigger in the eventlistener through the UI, statics could be added in your trigger binding (details further below).
 
 ## Deleted webhooks can still be rendered until a refresh occurs
 
@@ -22,22 +20,9 @@ Due to a bug in *our* codebase, a scenario exists whereby deleted webhooks can a
 
 An error is displayed mentioning that problems occurred deleting webhooks (the ones named - and -), but `mywebhook` has actually been deleted. It is only until you refresh the page that this webhook will no longer be displayed.
 
-## Pipeline limitations
+## Tekton Triggers Information
 
-The Webhooks Extension component does not currently work with all Tekton Pipelines, it very specifically creates the following when the webhook is triggered:
 
-#### Git PipelineResource
-
-A PipelineResource of type `git` is created with:
-
-  - `revision` set to the short commit ID from the webhook payload.
-  - `url` set to the repository URL from the webhook payload.
-
-#### Image PipelineResource
-
-A PipelineResource of type `image` is created with:
-
-  - `url` set to `${REGISTRY}/${REPOSITORY-NAME}:${SHORT-COMMITID}` where, `REGISTRY` is the value set when creating the webhook, other values are taken from the webhook payload.
 
 #### PipelineRuns Parameters/Resources
 

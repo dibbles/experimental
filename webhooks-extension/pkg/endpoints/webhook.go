@@ -256,8 +256,7 @@ func (r Resource) getParams(webhook webhook) (webhookParams, monitorParams []pip
 	hookParams := []pipelinesv1alpha1.Param{
 		{Name: "release-name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: releaseName}},
 		{Name: "target-namespace", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.Namespace}},
-		{Name: "service-account", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.ServiceAccount}},
-		{Name: "repository-name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: repo}}}
+		{Name: "service-account", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.ServiceAccount}}}
 
 	if webhook.DockerRegistry != "" {
 		hookParams = append(hookParams, pipelinesv1alpha1.Param{Name: "docker-registry", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.DockerRegistry}})

@@ -59,11 +59,6 @@ do
   fi
   let "i++"
 done
-#post_data='[{"op":"remove","path":"serviceaccount/secrets/-","value":{"name":"github-repo-access-secret"}}]'
-#curl -X PATCH --header Content-Type:application/json-patch+json -d "$post_data" http://localhost:31001/proxy/api/v1/namespaces/${DASHBOARD_INSTALL_NS}/serviceaccounts/tekton-dashboard
-
-#post_data='[{"op":"remove","path":"serviceaccount/secrets/-","value":{"name":"docker-push"}}]'
-#curl -X PATCH --header Content-Type:application/json-patch+json -d "$post_data" http://localhost:31001/proxy/api/v1/namespaces/${DASHBOARD_INSTALL_NS}/serviceaccounts/tekton-dashboard
 
 rm -rf example-pipelines
 
