@@ -182,7 +182,7 @@ spec:
         # This secret name will then be picked up by the Go code that is responsible for 
         # creating the EventListener, Ingress and webhooks.
         # The Ingress will be created with the tls secret name value set to this variable's value.
-        - name: TRIGGERS_PROTOTYPE_INGRESS_CERTIFICATE_SECRET_NAME
+        - name: CERTIFICATE_SECRET_NAME
           value: ""
         image: github.com/tektoncd/experimental/webhooks-extension/cmd/extension
         imagePullPolicy: Always

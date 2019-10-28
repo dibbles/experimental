@@ -62,7 +62,7 @@ func NewResource() (Resource, error) {
 	defaults := EnvDefaults{
 		Namespace:         os.Getenv("INSTALLED_NAMESPACE"),
 		DockerRegistry:    os.Getenv("DOCKER_REGISTRY_LOCATION"),
-		CertificateSecret: os.Getenv("TRIGGERS_PROTOTYPE_INGRESS_CERTIFICATE_SECRET_NAME"),
+		CertificateSecret: os.Getenv("CERTIFICATE_SECRET_NAME"),
 		CallbackURL:       os.Getenv("WEBHOOK_CALLBACK_URL"),
 	}
 

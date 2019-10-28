@@ -24,40 +24,30 @@ An error is displayed mentioning that problems occurred deleting webhooks (the o
 
 #### Trigger Template & Trigger Bindings
 
+As the UI does not currently offer the ability to select a trigger template or trigger binding, the current backend code expects to find trigger template and binding with fixed names prefixed with the pipeline name.
 
+- `<pipeline-name>-template`
+- `<pipeline-name>-push-binding`
+- `<pipeline-name>-pullrequest-binding`
+
+The reason for requesting two bindings is due to the event payload being different.  The bindings would need to pull different keys from the event payload to run a pipeline for both pull requests and push events.
 
 #### Event Listener Parameters
 
-For a PipelineRun for your chosen Pipeline, in the namespace specified when your webhook was created, the values assigned to parameters on the PipelineRun are taken from values provided when configuring the webhook or from the webhook payload itself.
+When a webhook is created through the dashboard UI, a number of parameters are made available to the trigger template through the event listener.  The parameters added to the trigger in the event listener are:
 
-It is important to note the names of the parameters and resources, should you wish to use the extension with your own Pipelines and make use of these values.
-
-PipelineRun parameters and resources made available:
+It is important to note the names of the parameters, should you wish to use the extension with your own trigger templates and make use of these values.
 
 ```
 params:
-- name: image-tag
-  description: The short commit ID
-- name: image-name
-  description: Image name formatted as: <REGISTRY>/<REPOSITORY-NAME>
-- name: repository-name
-  description: Repository name formatted as: <REPOSITORY-NAME>
 - name: release-name
-  description: Repository name formatted as: <REPOSITORY-NAME>
+  description: The git repository name
 - name: target-namespace
-  description: The PipelineRun target namespace
-- name: event-payload
-  description: The JSON event payload/body
-- name: event-headers
-  description: The JSON headers
-- name: branch
-  description: The repository branch
-
-resources:
-- name: docker-image
-  description: The Name of the ImageResource
-- name: git-source
-  description: The Name of the GitResource
+  description: A namespace, generally referenced in metadata sections to define the namespace in which to create a resource
+- name: service-account
+  description: A service account name, generally referenced to ensure PipelineRuns are executed under a specific service account
+- name: docker-registry
+  description: A docker registry, generally referenced where systems push images to a configured registry 
 ```
 
-In particular, the `event-headers` and `event-payload` parameters can be especially useful when creating `Conditions` for `Pipelines`. For example, [this](https://github.com/pipeline-hotel/example-pipelines/blob/master/config/pipeline.yaml) `Pipeline` uses [this](https://github.com/pipeline-hotel/example-pipelines/blob/master/config/deployment-condition.yaml) `Condition` to skip `Tasks` if the event type is a `pull_request`.
+The event headers and event-payload parameters can be especially useful when creating `Conditions` for `Pipelines`. For example, [this](https://github.com/pipeline-hotel/example-pipelines/blob/master/triggers-resources/config/simple-pipeline/simple-pipeline.yaml) `Pipeline` uses [this](https://github.com/pipeline-hotel/example-pipelines/blob/master/triggers-resources/config/simple-pipeline/deployment-condition.yaml) `Condition` to skip `Tasks` if the event type is a `pull_request`.  You can see how the relevant property is passed from the event via the bindings files [here](https://github.com/pipeline-hotel/example-pipelines/blob/master/triggers-resources/config/simple-pipeline/simple-pipeline-push-binding.yaml) for push events and [here](https://github.com/pipeline-hotel/example-pipelines/blob/master/triggers-resources/config/simple-pipeline/simple-pipeline-pullrequest-binding.yaml) for pull requests.
