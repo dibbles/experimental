@@ -42,6 +42,33 @@ const eventListenerName = "tekton-webhooks-eventlistener"
 */
 func (r Resource) createEventListener(webhook webhook, namespace, monitorTriggerName string) (*v1alpha1.EventListener, error) {
 	hookParams, monitorParams := r.getParams(webhook)
+
+	pushTrigger := r.newTrigger(webhook.Name+"-"+webhook.Namespace+"-push-event",
+		webhook.Pipeline+"-push-binding",
+		webhook.Pipeline+"-template",
+		webhook.GitRepositoryURL,
+		"push",
+		webhook.AccessTokenRef,
+		hookParams)
+
+	pullRequestTrigger := r.newTrigger(webhook.Name+"-"+webhook.Namespace+"-pullrequest-event",
+		webhook.Pipeline+"-pullrequest-binding",
+		webhook.Pipeline+"-template",
+		webhook.GitRepositoryURL,
+		"pull_request",
+		webhook.AccessTokenRef,
+		hookParams)
+
+	monitorTrigger := r.newTrigger(monitorTriggerName,
+		webhook.PullTask+"-binding",
+		webhook.PullTask+"-template",
+		webhook.GitRepositoryURL,
+		"pull_request",
+		webhook.AccessTokenRef,
+		monitorParams)
+
+	triggers := []v1alpha1.EventListenerTrigger{pushTrigger, pullRequestTrigger, monitorTrigger}
+
 	eventListener := v1alpha1.EventListener{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      eventListenerName,
@@ -49,85 +76,10 @@ func (r Resource) createEventListener(webhook webhook, namespace, monitorTrigger
 		},
 		Spec: v1alpha1.EventListenerSpec{
 			ServiceAccountName: os.Getenv("SERVICE_ACCOUNT"),
-			Triggers: []v1alpha1.EventListenerTrigger{
-				v1alpha1.EventListenerTrigger{
-					Name: webhook.Name + "-" + webhook.Namespace + "-push-event",
-					Binding: v1alpha1.EventListenerBinding{
-						Name:       webhook.Pipeline + "-push-binding",
-						APIVersion: "v1alpha1",
-					},
-					Params: hookParams,
-					Template: v1alpha1.EventListenerTemplate{
-						Name:       webhook.Pipeline + "-template",
-						APIVersion: "v1alpha1",
-					},
-					Interceptor: &v1alpha1.EventInterceptor{
-						Header: []pipelinesv1alpha1.Param{
-							{Name: "Wext-Trigger-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.Name + "-" + webhook.Namespace + "-push-event"}},
-							{Name: "Wext-Repository-Url", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.GitRepositoryURL}},
-							{Name: "Wext-Incoming-Event", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "push"}},
-							{Name: "Wext-Secret-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.AccessTokenRef}}},
-						ObjectRef: &corev1.ObjectReference{
-							APIVersion: "v1",
-							Kind:       "Service",
-							Name:       "tekton-webhooks-extension-validator",
-							Namespace:  r.Defaults.Namespace,
-						},
-					},
-				},
-				v1alpha1.EventListenerTrigger{
-					Name: webhook.Name + "-" + webhook.Namespace + "-pullrequest-event",
-					Binding: v1alpha1.EventListenerBinding{
-						Name:       webhook.Pipeline + "-pullrequest-binding",
-						APIVersion: "v1alpha1",
-					},
-					Params: hookParams,
-					Template: v1alpha1.EventListenerTemplate{
-						Name:       webhook.Pipeline + "-template",
-						APIVersion: "v1alpha1",
-					},
-					Interceptor: &v1alpha1.EventInterceptor{
-						Header: []pipelinesv1alpha1.Param{
-							{Name: "Wext-Trigger-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.Name + "-" + webhook.Namespace + "-pullrequest-event"}},
-							{Name: "Wext-Repository-Url", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.GitRepositoryURL}},
-							{Name: "Wext-Incoming-Event", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "pull_request"}},
-							{Name: "Wext-Secret-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.AccessTokenRef}}},
-						ObjectRef: &corev1.ObjectReference{
-							APIVersion: "v1",
-							Kind:       "Service",
-							Name:       "tekton-webhooks-extension-validator",
-							Namespace:  r.Defaults.Namespace,
-						},
-					},
-				},
-				v1alpha1.EventListenerTrigger{
-					Name: monitorTriggerName,
-					Binding: v1alpha1.EventListenerBinding{
-						Name:       webhook.PullTask + "-binding",
-						APIVersion: "v1alpha1",
-					},
-					Params: monitorParams,
-					Template: v1alpha1.EventListenerTemplate{
-						Name:       webhook.PullTask + "-template",
-						APIVersion: "v1alpha1",
-					},
-					Interceptor: &v1alpha1.EventInterceptor{
-						Header: []pipelinesv1alpha1.Param{
-							{Name: "Wext-Trigger-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: monitorTriggerName}},
-							{Name: "Wext-Repository-Url", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.GitRepositoryURL}},
-							{Name: "Wext-Incoming-Event", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "pull_request"}},
-							{Name: "Wext-Secret-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.AccessTokenRef}}},
-						ObjectRef: &corev1.ObjectReference{
-							APIVersion: "v1",
-							Kind:       "Service",
-							Name:       "tekton-webhooks-extension-validator",
-							Namespace:  r.Defaults.Namespace,
-						},
-					},
-				},
-			},
+			Triggers:           triggers,
 		},
 	}
+
 	return r.TriggersClient.TektonV1alpha1().EventListeners(namespace).Create(&eventListener)
 }
 
@@ -137,56 +89,21 @@ func (r Resource) createEventListener(webhook webhook, namespace, monitorTrigger
 */
 func (r Resource) updateEventListener(eventListener *v1alpha1.EventListener, webhook webhook, monitorTriggerName string) (*v1alpha1.EventListener, error) {
 	hookParams, monitorParams := r.getParams(webhook)
-	newPushTrigger := v1alpha1.EventListenerTrigger{
-		Name: webhook.Name + "-" + webhook.Namespace + "-push-event",
-		Binding: v1alpha1.EventListenerBinding{
-			Name:       webhook.Pipeline + "-push-binding",
-			APIVersion: "v1alpha1",
-		},
-		Params: hookParams,
-		Template: v1alpha1.EventListenerTemplate{
-			Name:       webhook.Pipeline + "-template",
-			APIVersion: "v1alpha1",
-		},
-		Interceptor: &v1alpha1.EventInterceptor{
-			Header: []pipelinesv1alpha1.Param{
-				{Name: "Wext-Trigger-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.Name + "-" + webhook.Namespace + "-push-event"}},
-				{Name: "Wext-Repository-Url", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.GitRepositoryURL}},
-				{Name: "Wext-Incoming-Event", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "push"}},
-				{Name: "Wext-Secret-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.AccessTokenRef}}},
-			ObjectRef: &corev1.ObjectReference{
-				APIVersion: "v1",
-				Kind:       "Service",
-				Name:       "tekton-webhooks-extension-validator",
-				Namespace:  r.Defaults.Namespace,
-			},
-		},
-	}
-	newPullRequestTrigger := v1alpha1.EventListenerTrigger{
-		Name: webhook.Name + "-" + webhook.Namespace + "-pullrequest-event",
-		Binding: v1alpha1.EventListenerBinding{
-			Name:       webhook.Pipeline + "-pullrequest-binding",
-			APIVersion: "v1alpha1",
-		},
-		Params: hookParams,
-		Template: v1alpha1.EventListenerTemplate{
-			Name:       webhook.Pipeline + "-template",
-			APIVersion: "v1alpha1",
-		},
-		Interceptor: &v1alpha1.EventInterceptor{
-			Header: []pipelinesv1alpha1.Param{
-				{Name: "Wext-Trigger-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.Name + "-" + webhook.Namespace + "-pullrequest-event"}},
-				{Name: "Wext-Repository-Url", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.GitRepositoryURL}},
-				{Name: "Wext-Incoming-Event", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "pull_request"}},
-				{Name: "Wext-Secret-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.AccessTokenRef}}},
-			ObjectRef: &corev1.ObjectReference{
-				APIVersion: "v1",
-				Kind:       "Service",
-				Name:       "tekton-webhooks-extension-validator",
-				Namespace:  r.Defaults.Namespace,
-			},
-		},
-	}
+	newPushTrigger := r.newTrigger(webhook.Name+"-"+webhook.Namespace+"-push-event",
+		webhook.Pipeline+"-push-binding",
+		webhook.Pipeline+"-template",
+		webhook.GitRepositoryURL,
+		"push",
+		webhook.AccessTokenRef,
+		hookParams)
+
+	newPullRequestTrigger := r.newTrigger(webhook.Name+"-"+webhook.Namespace+"-pullrequest-event",
+		webhook.Pipeline+"-pullrequest-binding",
+		webhook.Pipeline+"-template",
+		webhook.GitRepositoryURL,
+		"pull_request",
+		webhook.AccessTokenRef,
+		hookParams)
 
 	eventListener.Spec.Triggers = append(eventListener.Spec.Triggers, newPushTrigger)
 	eventListener.Spec.Triggers = append(eventListener.Spec.Triggers, newPullRequestTrigger)
@@ -199,35 +116,46 @@ func (r Resource) updateEventListener(eventListener *v1alpha1.EventListener, web
 		}
 	}
 	if !existingMonitorFound {
-		newMonitor := v1alpha1.EventListenerTrigger{
-			Name: monitorTriggerName,
-			Binding: v1alpha1.EventListenerBinding{
-				Name:       webhook.PullTask + "-binding",
-				APIVersion: "v1alpha1",
-			},
-			Params: monitorParams,
-			Template: v1alpha1.EventListenerTemplate{
-				Name:       webhook.PullTask + "-template",
-				APIVersion: "v1alpha1",
-			},
-			Interceptor: &v1alpha1.EventInterceptor{
-				Header: []pipelinesv1alpha1.Param{
-					{Name: "Wext-Trigger-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: monitorTriggerName}},
-					{Name: "Wext-Repository-Url", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.GitRepositoryURL}},
-					{Name: "Wext-Incoming-Event", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "pull_request"}},
-					{Name: "Wext-Secret-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: webhook.AccessTokenRef}}},
-				ObjectRef: &corev1.ObjectReference{
-					APIVersion: "v1",
-					Kind:       "Service",
-					Name:       "tekton-webhooks-extension-validator",
-					Namespace:  r.Defaults.Namespace,
-				},
-			},
-		}
+		newMonitor := r.newTrigger(monitorTriggerName,
+			webhook.PullTask+"-binding",
+			webhook.PullTask+"-template",
+			webhook.GitRepositoryURL,
+			"pull_request",
+			webhook.AccessTokenRef,
+			monitorParams)
+
 		eventListener.Spec.Triggers = append(eventListener.Spec.Triggers, newMonitor)
 	}
 
 	return r.TriggersClient.TektonV1alpha1().EventListeners(eventListener.GetNamespace()).Update(eventListener)
+}
+
+func (r Resource) newTrigger(name, bindingName, templateName, repoURL, event, secretName string, params []pipelinesv1alpha1.Param) v1alpha1.EventListenerTrigger {
+	return v1alpha1.EventListenerTrigger{
+		Name: name,
+		Binding: v1alpha1.EventListenerBinding{
+			Name:       bindingName,
+			APIVersion: "v1alpha1",
+		},
+		Params: params,
+		Template: v1alpha1.EventListenerTemplate{
+			Name:       templateName,
+			APIVersion: "v1alpha1",
+		},
+		Interceptor: &v1alpha1.EventInterceptor{
+			Header: []pipelinesv1alpha1.Param{
+				{Name: "Wext-Trigger-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: name}},
+				{Name: "Wext-Repository-Url", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: repoURL}},
+				{Name: "Wext-Incoming-Event", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: event}},
+				{Name: "Wext-Secret-Name", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: secretName}}},
+			ObjectRef: &corev1.ObjectReference{
+				APIVersion: "v1",
+				Kind:       "Service",
+				Name:       "tekton-webhooks-extension-validator",
+				Namespace:  r.Defaults.Namespace,
+			},
+		},
+	}
 }
 
 /*
