@@ -12,7 +12,9 @@ If the Tekton Dashboard has been installed into a namespace other than "tekton-p
     _On Red Hat OpenShift:_
 
     ```bash
-    oc apply --filename https://github.com/tektoncd/dashboard/releases/latest/download/openshift-webhooks-extension.yaml
+    curl -L https://github.com/tektoncd/dashboard/releases/latest/download/openshift-webhooks-extension.yaml \
+    | sed -e 's/DOMAIN_NAME/YOUR_DOMAIN_NAME_HERE/g' \
+    | oc apply --filename -
     ```
 
     _On other Kubernetes environments:_
@@ -30,7 +32,8 @@ If the Tekton Dashboard has been installed into a namespace other than "tekton-p
     
     ```bash
     curl -L https://github.com/tektoncd/dashboard/releases/latest/download/openshift-webhooks-extension.yaml \
-    | sed 's/tekton-pipelines/TARGET_NAMESPACE/' \
+    | sed 's/tekton-pipelines/TARGET_NAMESPACE/g' \
+    | sed 's/DOMAIN_NAME/YOUR_DOMAIN_NAME_HERE/g' \
     | oc apply --filename -
     ```
 
@@ -38,7 +41,7 @@ If the Tekton Dashboard has been installed into a namespace other than "tekton-p
 
     ```bash
     curl -L https://github.com/tektoncd/dashboard/releases/latest/download/webhooks-extension_release.yaml \
-    | sed 's/tekton-pipelines/TARGET_NAMESPACE/' \
+    | sed 's/tekton-pipelines/TARGET_NAMESPACE/g' \
     | kubectl apply --filename -
     ```  
 <br/>

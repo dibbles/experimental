@@ -60,10 +60,9 @@ func NewResource() (Resource, error) {
 	}
 
 	defaults := EnvDefaults{
-		Namespace:         os.Getenv("INSTALLED_NAMESPACE"),
-		DockerRegistry:    os.Getenv("DOCKER_REGISTRY_LOCATION"),
-		CertificateSecret: os.Getenv("CERTIFICATE_SECRET_NAME"),
-		CallbackURL:       os.Getenv("WEBHOOK_CALLBACK_URL"),
+		Namespace:      os.Getenv("INSTALLED_NAMESPACE"),
+		DockerRegistry: os.Getenv("DOCKER_REGISTRY_LOCATION"),
+		CallbackURL:    os.Getenv("WEBHOOK_CALLBACK_URL"),
 	}
 
 	r := Resource{
@@ -96,8 +95,7 @@ const ConfigMapName = "githubwebhook"
 
 //
 type EnvDefaults struct {
-	Namespace         string `json:"namespace"`
-	DockerRegistry    string `json:"dockerregistry"`
-	CertificateSecret string `json:"certsecret"`
-	CallbackURL       string `json:"endpointurl"`
+	Namespace      string `json:"namespace"`
+	DockerRegistry string `json:"dockerregistry"`
+	CallbackURL    string `json:"endpointurl"`
 }

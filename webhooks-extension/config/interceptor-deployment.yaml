@@ -21,3 +21,4 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+      serviceAccountName: tekton-webhooks-extension

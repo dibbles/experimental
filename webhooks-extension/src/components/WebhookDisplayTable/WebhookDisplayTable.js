@@ -256,7 +256,6 @@ export class WebhookDisplayTable extends Component {
               )}
               {this.state.deletingWebhook && !this.state.showNotificationOnTable && (
                 <InlineNotification
-                  id='deleting-notification'
                   kind='info'
                   subtitle={<InlineLoading
                     status='active'

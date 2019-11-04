@@ -417,22 +417,43 @@ func (r Resource) createWebhook(request *restful.Request, response *restful.Resp
 			RespondError(response, errors.New(msg), http.StatusInternalServerError)
 			return
 		}
-		ingressTaskRun, err := r.createIngressTaskRun("create", installNs)
-		if err != nil {
-			msg := fmt.Sprintf("error creating webhook due to error creating taskrun to create ingress. Error was: %s", err)
-			logging.Log.Errorf("%s", msg)
-			RespondError(response, errors.New(msg), http.StatusInternalServerError)
-			return
-		}
+		_, varexists := os.LookupEnv("PLATFORM")
+		if !varexists {
+			ingressTaskRun, err := r.createIngressTaskRun("create", installNs)
+			if err != nil {
+				msg := fmt.Sprintf("error creating webhook due to error creating taskrun to create ingress. Error was: %s", err)
+				logging.Log.Errorf("%s", msg)
+				RespondError(response, errors.New(msg), http.StatusInternalServerError)
+				return
+			}
 
-		ingressTaskRunResult, err := r.checkTaskRunSucceeds(ingressTaskRun, installNs)
-		if !ingressTaskRunResult && err != nil {
-			msg := fmt.Sprintf("error creating webhook due to error in taskrun to create ingress. Error was: %s", err)
-			logging.Log.Errorf("%s", msg)
-			RespondError(response, errors.New(msg), http.StatusInternalServerError)
-			return
+			ingressTaskRunResult, err := r.checkTaskRunSucceeds(ingressTaskRun, installNs)
+			if !ingressTaskRunResult && err != nil {
+				msg := fmt.Sprintf("error creating webhook due to error in taskrun to create ingress. Error was: %s", err)
+				logging.Log.Errorf("%s", msg)
+				RespondError(response, errors.New(msg), http.StatusInternalServerError)
+				return
+			} else {
+				logging.Log.Debug("ingress creation taskrun succeeded")
+			}
 		} else {
-			logging.Log.Debug("ingress taskrun succeeded")
+			routeTaskRun, err := r.createRouteTaskRun("create", installNs)
+			if err != nil {
+				msg := fmt.Sprintf("error creating webhook due to error creating taskrun to create route. Error was: %s", err)
+				logging.Log.Errorf("%s", msg)
+				RespondError(response, errors.New(msg), http.StatusInternalServerError)
+				return
+			}
+
+			routeTaskRunResult, err := r.checkTaskRunSucceeds(routeTaskRun, installNs)
+			if !routeTaskRunResult && err != nil {
+				msg := fmt.Sprintf("error creating webhook due to error in taskrun to create route. Error was: %s", err)
+				logging.Log.Errorf("%s", msg)
+				RespondError(response, errors.New(msg), http.StatusInternalServerError)
+				return
+			} else {
+				logging.Log.Debug("route creation taskrun succeeded")
+			}
 		}
 
 	}
@@ -477,7 +498,6 @@ func (r Resource) createIngressTaskRun(mode, installNS string) (*pipelinesv1alph
 
 	params := []pipelinesv1alpha1.Param{
 		{Name: "Mode", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: mode}},
-		{Name: "CertificateSecretName", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: r.Defaults.CertificateSecret}},
 		{Name: "CallbackURL", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: callback}},
 		{Name: "EventListenerServiceName", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "el-" + eventListenerName}},
 		{Name: "EventListenerPort", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "8080"}}}
@@ -503,6 +523,37 @@ func (r Resource) createIngressTaskRun(mode, installNS string) (*pipelinesv1alph
 		return &pipelinesv1alpha1.TaskRun{}, err
 	}
 	logging.Log.Debugf("Ingress being created under taskrun %s", tr.GetName())
+
+	return tr, nil
+}
+
+func (r Resource) createRouteTaskRun(mode, installNS string) (*pipelinesv1alpha1.TaskRun, error) {
+
+	params := []pipelinesv1alpha1.Param{
+		{Name: "Mode", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: mode}},
+		{Name: "EventListenerServiceName", Value: pipelinesv1alpha1.ArrayOrString{Type: pipelinesv1alpha1.ParamTypeString, StringVal: "el-" + eventListenerName}}}
+
+	routeTaskRun := pipelinesv1alpha1.TaskRun{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: "create-route-",
+			Namespace:    installNS,
+		},
+		Spec: pipelinesv1alpha1.TaskRunSpec{
+			Inputs: pipelinesv1alpha1.TaskRunInputs{
+				Params: params,
+			},
+			ServiceAccount: "tekton-webhooks-extension",
+			TaskRef: &pipelinesv1alpha1.TaskRef{
+				Name: "route-task",
+			},
+		},
+	}
+
+	tr, err := r.TektonClient.TektonV1alpha1().TaskRuns(installNS).Create(&routeTaskRun)
+	if err != nil {
+		return &pipelinesv1alpha1.TaskRun{}, err
+	}
+	logging.Log.Debugf("Route being created under taskrun %s", tr.GetName())
 
 	return tr, nil
 }
@@ -729,19 +780,42 @@ func (r Resource) deleteFromEventListener(name, installNS, monitorTriggerName, r
 
 	if len(newTriggers) == 0 {
 		err = r.TriggersClient.TektonV1alpha1().EventListeners(installNS).Delete(el.GetName(), &metav1.DeleteOptions{})
-		deleteIngressTaskRun, err := r.createIngressTaskRun("delete", installNS)
 		if err != nil {
-			logging.Log.Errorf("error creating ingress deletion taskrun: %s", err)
 			return err
 		}
-		deleted, err := r.checkTaskRunSucceeds(deleteIngressTaskRun, installNS)
-		if !deleted && err != nil {
-			logging.Log.Errorf("error during ingress deletion taskrun: %s", err)
-			return err
+
+		_, varExists := os.LookupEnv("PLATFORM")
+		if !varExists {
+			deleteIngressTaskRun, err := r.createIngressTaskRun("delete", installNS)
+			if err != nil {
+				logging.Log.Errorf("error creating ingress deletion taskrun: %s", err)
+				return err
+			}
+			deleted, err := r.checkTaskRunSucceeds(deleteIngressTaskRun, installNS)
+			if !deleted && err != nil {
+				logging.Log.Errorf("error during ingress deletion taskrun: %s", err)
+				return err
+			} else {
+				logging.Log.Debug("Ingress deletion taskrun succeeded")
+				return nil
+			}
 		} else {
-			logging.Log.Debug("Ingress task run succeeded")
-			return nil
+			routeTaskRun, err := r.createRouteTaskRun("delete", installNS)
+			if err != nil {
+				msg := fmt.Sprintf("error deleting webhook due to error creating taskrun to delete route. Error was: %s", err)
+				logging.Log.Errorf("%s", msg)
+				return err
+			}
+			routeTaskRunResult, err := r.checkTaskRunSucceeds(routeTaskRun, installNS)
+			if !routeTaskRunResult && err != nil {
+				msg := fmt.Sprintf("error deleting webhook due to error in taskrun to delete route. Error was: %s", err)
+				logging.Log.Errorf("%s", msg)
+				return err
+			} else {
+				logging.Log.Debug("route deletion taskrun succeeded")
+			}
 		}
+
 	} else {
 		el.Spec.Triggers = newTriggers
 		_, err = r.TriggersClient.TektonV1alpha1().EventListeners(installNS).Update(el)

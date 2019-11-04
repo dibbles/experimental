@@ -129,5 +129,5 @@ You can use `kubectl logs [pod-name] --all-containers` to check the output of ea
 
 - Create a service account and RoleBinding for the PipelineRuns to use
 - Create the correct Git and Docker credentials and patch the right service account
-- Ensure that your GitHub can route correctly to the ingress/route exposing the eventlistener: use `kubectl get ingress` to check its value, and the GitHub web pages to see that the webhook was correctly created, and that it successfully delivered its payload.
+- Ensure that your GitHub can route correctly to the ingress/route exposing the eventlistener: use `kubectl get ingress` (or `kubectl get route el-tekton-webhooks-eventlistener` on openshift) to check its value, and the GitHub web pages to see that the webhook was correctly created, and that it successfully delivered its payload.
 

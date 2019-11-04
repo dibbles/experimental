@@ -10,11 +10,6 @@ spec:
       description: Whether to create or delete an Ingress
       default: "create"
       type: string
-    - name: CertificateSecretName
-      # Generate upfront so we don't need to reference outdated openssl images, potentially leading to license/export regulation complications
-      description: The secret name for the Ingress certificate - must be generated upfront
-      default: "mycertificatesecret"
-      type: string
     - name: CallbackURL 
       description: The external access URL
       default: "listener.replaceme.nip.io"
@@ -44,10 +39,6 @@ spec:
         metadata:
           name: $(inputs.params.EventListenerServiceName)
         spec:
-          tls:
-          - hosts:
-            - $(inputs.params.CallbackURL)
-            secretName: $(inputs.params.CertificateSecretName)
           rules:
           - host: $(inputs.params.CallbackURL)
             http:
