@@ -24,15 +24,15 @@ These instructions are not for production usage.  Note: If you want to install i
 
       _On Red Hat OpenShift:_
 
-      Open config/openshift-development/openshift-tekton-webhooks-extension-development.yaml.
-      Find WEBHOOK_CALLBACK_URL.
-      Edit the value - this could simply be a case of replacing YOUR_DOMAIN_NAME with your actual value.
+      - Open config/openshift-development/openshift-tekton-webhooks-extension-development.yaml.
+      - Find WEBHOOK_CALLBACK_URL.
+      - Edit the value - this could simply be a case of replacing YOUR_DOMAIN_NAME with your actual value.
 
       _On other Kubernetes environments:_
 
-      Open config/extension-development.yaml.
-      Find WEBHOOK_CALLBACK_URL.
-      Edit the value - this could simply be a case of replacing IPADDRESS with your actual value.
+      - Open config/extension-development.yaml.
+      - Find WEBHOOK_CALLBACK_URL.
+      - Edit the value - this could simply be a case of replacing IPADDRESS with your actual value.
 
   3. Apply the yaml
 
