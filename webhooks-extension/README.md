@@ -25,6 +25,10 @@ See our [Getting Started](https://github.com/tektoncd/experimental/blob/master/w
 [Pull Request Status Updates](./docs/Monitoring.md)  
 [Limitations](./docs/Limitations.md)  
 
+### Architecture Guide
+
+[Architecture](./docs/Architecture.md)
+
 ### Uninstall
 
 [Uninstall](./docs/Uninstall.md)

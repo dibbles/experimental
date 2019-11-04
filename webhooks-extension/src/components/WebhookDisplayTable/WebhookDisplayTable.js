@@ -33,6 +33,7 @@ import {
   TableBatchAction,
   TableToolbarSearch,
   InlineNotification,
+  InlineLoading,
 } from 'carbon-components-react';
 
 const {
@@ -62,7 +63,9 @@ export class WebhookDisplayTable extends Component {
     notificationMessage: "",
     notificationStatus: 'success',
     notificationStatusMsgShort: 'Webhook created successfully.',
-    selectedWebhook: null
+    selectedWebhook: null,
+    deletingWebhook: false,
+    overlayClassName: 'overlay-disabled'
   };
 
   formatCellContent(id, value) {
@@ -138,7 +141,7 @@ export class WebhookDisplayTable extends Component {
       let namespace = id.substring(id.indexOf('|') + 1, id.lastIndexOf('|'));
       let repository = id.substring(id.lastIndexOf('|') + 1, id.length);
       let response = deleteWebhooks(theName, namespace, repository, deleteRuns);
-      let deletionTimeoutInMs = 5000;
+      let deletionTimeoutInMs = 120000;
       let theTimeout = new Promise((resolve, reject) => {
         setTimeout(function () {
           reject("Warning - timed out waiting to delete webhooks and potentially PipelineRuns: manually check that the resources you expect have been deleted successfully.")
@@ -149,6 +152,13 @@ export class WebhookDisplayTable extends Component {
       return deleteWithinTimePromise;
     })
 
+    this.setState({
+      deletingWebhook: true,
+      showNotificationOnTable: false,
+      overlayClassName: 'overlay-enabled',
+      showDeleteDialog: false,
+    })
+
     Promise.all(deletePromises).then( () => {
       this.fetchWebhooksForTable();
       if(this.state.webhooks.length - rowsToUse.length === 0){
@@ -157,10 +167,11 @@ export class WebhookDisplayTable extends Component {
       else {
         this.setState({
           showNotificationOnTable: true,
-          showDeleteDialog: false,
           notificationStatus: 'success',
           notificationStatusMsgShort: 'Webhook(s) deleted successfully.',
           notificationMessage: '',
+          overlayClassName: 'overlay-disabled',
+          deletingWebhook: false,
         });
       }
      }).catch( () => {
@@ -179,10 +190,11 @@ export class WebhookDisplayTable extends Component {
       }
       this.setState({
         showNotificationOnTable: true,
-        showDeleteDialog: false,
         notificationStatus: notificationStatusToSet,
         notificationStatusMsgShort: notificationMessageToSet,
         notificationMessage: notificationFullMessage,
+        overlayClassName: 'overlay-disabled',
+        deletingWebhook: false,
       });
     });
   }
@@ -269,7 +281,22 @@ export class WebhookDisplayTable extends Component {
                   lowContrast>
                 </InlineNotification>
               )}
+              {this.state.deletingWebhook && !this.state.showNotificationOnTable && (
+                <InlineNotification
+                  kind='info'
+                  subtitle={<InlineLoading
+                    status='active'
+                    iconDescription='Webhook(s) under deletion indicator'
+                    description='Webhook(s) under deletion, please do not navigate away from this page...'
+                  >
+                  </InlineLoading>}
+                  title=''
+                  lowContrast
+                >
+                </InlineNotification>
+              )}
               
+              <div className={this.state.overlayClassName} ></div>
               <DataTable
                 rows={initialRows}
                 headers={headers}
