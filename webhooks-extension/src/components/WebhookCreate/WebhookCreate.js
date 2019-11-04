@@ -516,7 +516,7 @@ class WebhookCreatePage extends Component {
                 status='active'
                 iconDescription='Webhook under creation indicator'
                 description='Webhook under creation, please do not navigate away from this page...'
-                successDelay={120}>
+                successDelay={300}>
               </InlineLoading>}
               title=''
               lowContrast

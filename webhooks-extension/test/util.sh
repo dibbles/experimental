@@ -90,6 +90,10 @@ function install_webhooks_extension() {
     echo "Missing [namespace]"
     exit 1
   fi 
+
+  sed -i -e .previous 's/IPADDRESS/${IPADDRESS}/g' config/extension-deployment.yaml
+  rm config/extension-deployment.yaml.previous
+  
   namespace=$1
   docker login
   npm ci

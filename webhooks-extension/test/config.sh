@@ -19,3 +19,7 @@ export GITHUB_URL="https://github.ibm.com"
 
 # This is the repo you want to set up a webhook for. See github.com/mnuttall/simple for a public copy of this repo. 
 export GITHUB_REPO="https://github.ibm.com/MNUTTALL/simple" 
+
+# This is your IP address if using docker-desktop.  This will be substituted into the value of the WEBHOOK_CALLBACK_URL
+# in the deployment yaml.
+export IPADDRESS=1.2.3.4
