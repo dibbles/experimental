@@ -237,8 +237,9 @@ spec:
         - name: WEB_RESOURCES_DIR
           value: web
         # If this endpoint's protocol is https, ssl verification will be enabled on the github webhook
+        # openshift_master_default_subdomain usually of the format 'apps.host.company.com'
         - name: WEBHOOK_CALLBACK_URL
-          value: "http://el-tekton-webhooks-eventlistener-tekton-pipelines.apps.DOMAIN_NAME"
+          value: "http://el-tekton-webhooks-eventlistener-tekton-pipelines.{openshift_master_default_subdomain}"
         - name: SERVICE_ACCOUNT
           valueFrom:
             fieldRef:
