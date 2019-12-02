@@ -34,6 +34,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	utils "github.com/tektoncd/experimental/webhooks-extension/pkg/utils"
 )
 
 var server *httptest.Server
@@ -819,7 +821,7 @@ func Test_getWebhookSecretTokens(t *testing.T) {
 				t.Errorf("getWebhookSecretTokens() error creating secret: %s", err)
 			}
 			// Test
-			gotAccessToken, gotSecretToken, err := r.getWebhookSecretTokens(tt.name)
+			gotAccessToken, gotSecretToken, err := utils.GetWebhookSecretTokens(r.K8sClient, r.Defaults.Namespace, tt.name)
 			if err != nil {
 				t.Errorf("getWebhookSecretTokens() returned an error: %s", err)
 			}
@@ -860,7 +862,7 @@ func Test_getWebhookSecretTokens_error(t *testing.T) {
 				t.Errorf("getWebhookSecretTokens() error creating secret: %s", err)
 			}
 			// Test
-			if _, _, err := r.getWebhookSecretTokens(tt.name); err == nil {
+			if _, _, err := utils.GetWebhookSecretTokens(r.K8sClient, r.Defaults.Namespace, tt.name); err == nil {
 				t.Errorf("getWebhookSecretTokens() did not return an error when expected")
 			}
 		})
@@ -871,7 +873,7 @@ func Test_createOAuth2Client(t *testing.T) {
 	// Create client
 	accessToken := "foo"
 	ctx := context.Background()
-	client := createOAuth2Client(ctx, accessToken)
+	client := utils.CreateOAuth2Client(ctx, accessToken)
 	// Test
 	responseText := "my response"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
