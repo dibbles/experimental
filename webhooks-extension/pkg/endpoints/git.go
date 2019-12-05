@@ -103,7 +103,10 @@ func (r Resource) createGitProviderForWebhook(hook webhook, org, reponame string
 	case strings.Contains(gitURL.Host, "github"):
 		apiURL := gitURL.Scheme + "://" + gitURL.Host + "/api/v3/"
 		return r.initGitHub(sslVerify, apiURL, hook.AccessTokenRef, org, reponame)
-	// NOT RECOGNIZED/SUPPORTED
+	// GITLAB
+	case strings.Contains(gitURL.Host, "gitlab"):
+		apiURL := gitURL.Scheme + "://" + gitURL.Host + "/api/v4"
+		return r.initGitLab(sslVerify, apiURL, hook.AccessTokenRef, org, reponame)
 	default:
 		msg := fmt.Sprintf("Git Provider for project URL: %s not recognized", gitURL)
 		return nil, errors.New(msg)

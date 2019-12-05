@@ -15,6 +15,7 @@ package utils
 
 import (
 	"context"
+	"crypto/tls"
 	restful "github.com/emicklei/go-restful"
 	logging "github.com/tektoncd/dashboard/pkg/logging"
 	"golang.org/x/oauth2"
@@ -50,6 +51,15 @@ func RespondMessageAndLogError(response *restful.Response, err error, message st
 func CreateOAuth2Client(ctx context.Context, accessToken string) *http.Client {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: accessToken})
 	return oauth2.NewClient(ctx, ts)
+}
+
+func GetClientAllowsSelfSigned() *http.Client {
+	transport := &http.Transport{
+		// ToDo - investigate InsecureSkipVerify here
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: transport}
+	return client
 }
 
 // getWebhookSecretTokens returns the "secretToken" and "accessToken" stored in the Secret

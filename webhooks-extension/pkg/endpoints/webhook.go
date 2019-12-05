@@ -56,7 +56,7 @@ func (r Resource) createEventListener(webhook webhook, namespace, monitorTrigger
 		webhook.Pipeline+"-push-binding",
 		webhook.Pipeline+"-template",
 		webhook.GitRepositoryURL,
-		"push",
+		"push, Push Hook",
 		webhook.AccessTokenRef,
 		hookParams)
 
@@ -64,7 +64,7 @@ func (r Resource) createEventListener(webhook webhook, namespace, monitorTrigger
 		webhook.Pipeline+"-pullrequest-binding",
 		webhook.Pipeline+"-template",
 		webhook.GitRepositoryURL,
-		"pull_request",
+		"pull_request, Merge Request Hook",
 		webhook.AccessTokenRef,
 		hookParams)
 	pullRequestTrigger.Interceptor.Header = append(pullRequestTrigger.Interceptor.Header, actions)
@@ -73,7 +73,7 @@ func (r Resource) createEventListener(webhook webhook, namespace, monitorTrigger
 		webhook.PullTask+"-binding",
 		webhook.PullTask+"-template",
 		webhook.GitRepositoryURL,
-		"pull_request",
+		"pull_request, Merge Request Hook",
 		webhook.AccessTokenRef,
 		monitorParams)
 	monitorTrigger.Interceptor.Header = append(monitorTrigger.Interceptor.Header, actions)
@@ -103,7 +103,7 @@ func (r Resource) updateEventListener(eventListener *v1alpha1.EventListener, web
 		webhook.Pipeline+"-push-binding",
 		webhook.Pipeline+"-template",
 		webhook.GitRepositoryURL,
-		"push",
+		"push, Push Hook",
 		webhook.AccessTokenRef,
 		hookParams)
 
@@ -111,7 +111,7 @@ func (r Resource) updateEventListener(eventListener *v1alpha1.EventListener, web
 		webhook.Pipeline+"-pullrequest-binding",
 		webhook.Pipeline+"-template",
 		webhook.GitRepositoryURL,
-		"pull_request",
+		"pull_request, Merge Request Hook",
 		webhook.AccessTokenRef,
 		hookParams)
 	newPullRequestTrigger.Interceptor.Header = append(newPullRequestTrigger.Interceptor.Header, actions)
@@ -131,7 +131,7 @@ func (r Resource) updateEventListener(eventListener *v1alpha1.EventListener, web
 			webhook.PullTask+"-binding",
 			webhook.PullTask+"-template",
 			webhook.GitRepositoryURL,
-			"pull_request",
+			"pull_request, Merge Request Hook",
 			webhook.AccessTokenRef,
 			monitorParams)
 		newMonitor.Interceptor.Header = append(newMonitor.Interceptor.Header, actions)

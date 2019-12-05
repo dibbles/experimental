@@ -13,92 +13,92 @@
 
 package main
 
-import (
-	"encoding/json"
-	"github.com/google/go-github/github"
-	"testing"
-)
+// import (
+// 	"encoding/json"
+// 	"github.com/google/go-github/github"
+// 	"testing"
+// )
 
-func TestAddBranchToPushPayload(t *testing.T) {
+// func TestAddBranchToPushPayload(t *testing.T) {
 
-	ref := "refs/head/master"
-	pushPayloadStruct := github.PushEvent{
-		Ref: &ref,
-	}
-	payload, err := json.Marshal(pushPayloadStruct)
-	if err != nil {
-		t.Errorf("Error in json.Marshal(pushPayloadStruct) %s", err)
-	}
+// 	ref := "refs/head/master"
+// 	pushPayloadStruct := github.PushEvent{
+// 		Ref: &ref,
+// 	}
+// 	payload, err := json.Marshal(pushPayloadStruct)
+// 	if err != nil {
+// 		t.Errorf("Error in json.Marshal(pushPayloadStruct) %s", err)
+// 	}
 
-	bytes, err := addBranchToPayload("push", payload)
-	if err != nil {
-		t.Errorf("Error in addBranchToPayload %s", err)
-	}
+// 	bytes, err := addBranchToPayload("push", payload)
+// 	if err != nil {
+// 		t.Errorf("Error in addBranchToPayload %s", err)
+// 	}
 
-	var p PushPayload
-	err = json.Unmarshal(bytes, &p)
-	if err != nil {
-		t.Errorf("Error in json.Unmarshal %s", err)
-	}
+// 	var p PushPayload
+// 	err = json.Unmarshal(bytes, &p)
+// 	if err != nil {
+// 		t.Errorf("Error in json.Unmarshal %s", err)
+// 	}
 
-	if "master" != p.WebhookBranch {
-		t.Errorf("Branch name not added as expected, branch was returned as %s", p.WebhookBranch)
-	}
+// 	if "master" != p.WebhookBranch {
+// 		t.Errorf("Branch name not added as expected, branch was returned as %s", p.WebhookBranch)
+// 	}
 
-}
+// }
 
-func TestAddBranchToPullRequestPayload(t *testing.T) {
+// func TestAddBranchToPullRequestPayload(t *testing.T) {
 
-	ref := "refs/head/master"
-	pullrequestPayloadStruct := github.PullRequestEvent{
-		PullRequest: &github.PullRequest{
-			Head: &github.PullRequestBranch{
-				Ref: &ref,
-			},
-		},
-	}
+// 	ref := "refs/head/master"
+// 	pullrequestPayloadStruct := github.PullRequestEvent{
+// 		PullRequest: &github.PullRequest{
+// 			Head: &github.PullRequestBranch{
+// 				Ref: &ref,
+// 			},
+// 		},
+// 	}
 
-	payload, err := json.Marshal(pullrequestPayloadStruct)
-	if err != nil {
-		t.Errorf("Error in json.Marshal(pullrequestPayloadStruct) %s", err)
-	}
+// 	payload, err := json.Marshal(pullrequestPayloadStruct)
+// 	if err != nil {
+// 		t.Errorf("Error in json.Marshal(pullrequestPayloadStruct) %s", err)
+// 	}
 
-	bytes, err := addBranchToPayload("pull_request", payload)
-	if err != nil {
-		t.Errorf("Error in addBranchToPayload %s", err)
-	}
+// 	bytes, err := addBranchToPayload("pull_request", payload)
+// 	if err != nil {
+// 		t.Errorf("Error in addBranchToPayload %s", err)
+// 	}
 
-	var p PullRequestPayload
-	err = json.Unmarshal(bytes, &p)
-	if err != nil {
-		t.Errorf("Error in json.Unmarshal %s", err)
-	}
+// 	var p PullRequestPayload
+// 	err = json.Unmarshal(bytes, &p)
+// 	if err != nil {
+// 		t.Errorf("Error in json.Unmarshal %s", err)
+// 	}
 
-	if "master" != p.WebhookBranch {
-		t.Errorf("Branch name not added as expected, branch was returned as %s", p.WebhookBranch)
-	}
+// 	if "master" != p.WebhookBranch {
+// 		t.Errorf("Branch name not added as expected, branch was returned as %s", p.WebhookBranch)
+// 	}
 
-}
+// }
 
-func TestAddBranchToOtherEventPayload(t *testing.T) {
+// func TestAddBranchToOtherEventPayload(t *testing.T) {
 
-	eventPayloadStruct := github.PingEvent{}
+// 	eventPayloadStruct := github.PingEvent{}
 
-	payload, err := json.Marshal(eventPayloadStruct)
-	if err != nil {
-		t.Errorf("Error in json.Marshal(eventPayloadStruct) %s", err)
-	}
+// 	payload, err := json.Marshal(eventPayloadStruct)
+// 	if err != nil {
+// 		t.Errorf("Error in json.Marshal(eventPayloadStruct) %s", err)
+// 	}
 
-	bytes, err := addBranchToPayload("ping", payload)
-	if err != nil {
-		t.Errorf("Error in addBranchToPayload %s", err)
-	}
+// 	bytes, err := addBranchToPayload("ping", payload)
+// 	if err != nil {
+// 		t.Errorf("Error in addBranchToPayload %s", err)
+// 	}
 
-	// Should be unchanged
-	var p github.PingEvent
-	err = json.Unmarshal(bytes, &p)
-	if err != nil {
-		t.Errorf("Error in json.Unmarshal - bytes may have been modified in addBranchToPayload, this should only be done for push and pull_request, %s", err)
-	}
+// 	// Should be unchanged
+// 	var p github.PingEvent
+// 	err = json.Unmarshal(bytes, &p)
+// 	if err != nil {
+// 		t.Errorf("Error in json.Unmarshal - bytes may have been modified in addBranchToPayload, this should only be done for push and pull_request, %s", err)
+// 	}
 
-}
+// }
